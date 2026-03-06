@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "[fw-validate] Checking docker services..."
+docker compose ps
+
+echo
+echo "[fw-validate] Checking backend health..."
+curl -fsS http://localhost:8000/api/v1/health
+echo
+
+echo
+echo "[fw-validate] Checking frontend..."
+curl -I http://localhost:3001 | head -n 1
+echo
+
+echo "[fw-validate] OK"

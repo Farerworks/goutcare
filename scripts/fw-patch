@@ -3,28 +3,27 @@ set -euo pipefail
 
 PROJECT="${1:-}"
 if [[ -z "$PROJECT" ]]; then
-  echo "Usage: fw-patch <project>"
+  echo "Usage: ./scripts/fw-patch <project>"
   exit 1
 fi
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)" pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PROJ_DIR="$ROOT"
 PATCH_DIR="$PROJ_DIR/.fw/patches"
 LOG_DIR="$PROJ_DIR/.fw/logs"
-mkdir -p "$PROJ_DIR/.fw/logs"
-mkdir -p "$LOG_DIR"
-
-if [[ ! -d "$PROJ_DIR" ]]; then
-  echo "Project not found: $PROJ_DIR"
-  exit 1
-fi
+VALIDATE_SCRIPT="$PROJ_DIR/scripts/fw-validate"
 
 mkdir -p "$PATCH_DIR"
+mkdir -p "$LOG_DIR"
 
-# 가장 최신 patch 선택
 PATCH_FILE="$(ls -1t "$PATCH_DIR"/*.patch 2>/dev/null | head -n 1 || true)"
 if [[ -z "$PATCH_FILE" ]]; then
   echo "No patch files found in: $PATCH_DIR"
+  exit 1
+fi
+
+if [[ ! -x "$VALIDATE_SCRIPT" ]]; then
+  echo "Validate script not found or not executable: $VALIDATE_SCRIPT"
   exit 1
 fi
 
@@ -36,10 +35,8 @@ LOG="$LOG_DIR/patch-$STAMP.log"
 echo "[fw-patch] project=$PROJECT" | tee -a "$LOG"
 echo "[fw-patch] patch=$PATCH_FILE" | tee -a "$LOG"
 
-# 안전을 위해 현재 상태 저장(스태시)
 git stash push -m "fw-patch-pre-$STAMP" >/dev/null 2>&1 || true
 
-# patch 적용
 set +e
 git apply "$PATCH_FILE" >>"$LOG" 2>&1
 APPLY_RC=$?
@@ -54,8 +51,21 @@ if [[ $APPLY_RC -ne 0 ]]; then
 fi
 
 echo "[fw-patch] APPLY OK" | tee -a "$LOG"
+echo "[fw-patch] Running validation..." | tee -a "$LOG"
 
-# 적용 후 스태시 정리 (성공하면 스태시 삭제)
+set +e
+"$VALIDATE_SCRIPT" >>"$LOG" 2>&1
+VALIDATE_RC=$?
+set -e
+
+if [[ $VALIDATE_RC -ne 0 ]]; then
+  echo "[fw-patch] VALIDATION FAILED. Rolling back..." | tee -a "$LOG"
+  git reset --hard >>"$LOG" 2>&1 || true
+  git stash pop >>"$LOG" 2>&1 || true
+  echo "[fw-patch] Rolled back after validation failure. See log: $LOG"
+  exit 3
+fi
+
+echo "[fw-patch] VALIDATION OK" | tee -a "$LOG"
 git stash drop >/dev/null 2>&1 || true
-
 echo "[fw-patch] Done. Log: $LOG"
