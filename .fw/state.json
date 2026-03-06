@@ -1,6 +1,6 @@
 {
   "project": "goutcare",
-  "phase": "patch_validate_ready",
+  "phase": "loop_executed",
   "last_commit_goal": "add patch apply and validation scripts",
   "scripts": {
     "patch": "scripts/fw-patch",
