@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PATCH_DIR="$ROOT/.fw/patches"
+
+mkdir -p "$PATCH_DIR"
+
+STAMP="$(date +%Y%m%d-%H%M%S)"
+PATCH_FILE="$PATCH_DIR/$STAMP-auto.patch"
+
+cd "$ROOT"
+
+if git diff --quiet; then
+  echo "[fw-makepatch] No changes detected."
+  exit 0
+fi
+
+git diff > "$PATCH_FILE"
+
+echo "[fw-makepatch] Patch created:"
+echo "$PATCH_FILE"
