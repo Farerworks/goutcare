@@ -1,0 +1,14 @@
+{
+  "project": "goutcare",
+  "phase": "patch_validate_ready",
+  "last_commit_goal": "add patch apply and validation scripts",
+  "scripts": {
+    "patch": "scripts/fw-patch",
+    "validate": "scripts/fw-validate"
+  },
+  "status": {
+    "patch_apply": true,
+    "validate": true,
+    "rollback_ready": true
+  }
+}
