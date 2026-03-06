@@ -1,18 +1,21 @@
-export default async function Home() {
-  const api = process.env.NEXT_PUBLIC_API_BASE_URL || "http://backend:8000";
-  let status = "unknown";
-  try {
-    const res = await fetch(`${api}/api/v1/health`, { cache: "no-store" });
-    const json = await res.json();
-    status = json.status || "ok";
-  } catch (e) {
-    status = "api not reachable";
-  }
+'use client';
 
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Home from './pages/Home';
+import Log from './pages/Log';
+import Dashboard from './pages/Dashboard';
+
+const App = () => {
   return (
-    <main style={{ padding: 24 }}>
-      <h1>GoutCare (MVP Skeleton)</h1>
-      <p>API health: <b>{status}</b></p>
-    </main>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/log" element={<Log />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </Router>
   );
-}
+};
+
+export default App;

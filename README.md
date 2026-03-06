@@ -1,53 +1,40 @@
-cat > ~/farerworks-studio/startups/goutcare/README.md << 'EOF'
-# GoutCare
+# GoutCare Application Setup
 
-GoutCare is an MVP skeleton (Next.js + FastAPI + Postgres) running via Docker Compose.
+## Prerequisites
+- Docker
+- Docker Compose
 
-## What is running
-- Frontend (Next.js): http://localhost:3001
-- Backend (FastAPI): http://localhost:8000
-- DB (Postgres): localhost:5432 (compose service name: db)
+## Setup Instructions
 
-## Quick Start (Local)
-cd ~/farerworks-studio/startups/goutcare
-docker compose up -d --build
-docker compose ps
+1. **Clone the repository:**
+   ```bash
+   git clone <repository-url>
+   cd goutcare
+   ```
 
-## Health Checks
+2. **Copy the `.env.example` to `.env` and configure the environment variables:**
+   ```bash
+   cp .env.example .env
+   ```
+   Edit the `.env` file to set the appropriate values for your environment.
 
-Backend:
-curl -i http://localhost:8000/api/v1/health
+3. **Start the application using Docker Compose:**
+   ```bash
+   docker-compose up --build
+   ```
 
-Expected result:
-HTTP/1.1 200 OK
-{"status":"ok"}
+4. **Access the application:**
+   - Backend API: `http://localhost:8000`
+   - Frontend: `http://localhost:3001`
 
-Frontend:
-Open browser:
-http://localhost:3001
+## Running Tests
 
-If the page shows "API health: ok", it’s connected.
+1. **Backend Tests:**
+   ```bash
+   docker-compose exec backend pytest
+   ```
 
-## Stop / Reset
-
-Stop containers:
-docker compose down
-
-Stop and remove database volume:
-docker compose down -v
-
-## Logs
-
-Backend logs:
-docker compose logs -f backend
-
-Frontend logs:
-docker compose logs -f frontend
-
-Database logs:
-docker compose logs -f db
-
-## Notes
-backend/app/generated/ and frontend/app/generated/ are auto-generated files.
-Do not edit them manually unless you know why.
-EOF
+2. **Frontend Tests:**
+   ```bash
+   docker-compose exec frontend npm test
+   ```

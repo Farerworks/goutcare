@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   backend:
     build: ./backend
@@ -16,8 +18,13 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: app
-      POSTGRES_DB: app
+      POSTGRES_DB: goutcare_db
+      POSTGRES_USER: goutcare_user
+      POSTGRES_PASSWORD: goutcare_pass
     ports:
       - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
